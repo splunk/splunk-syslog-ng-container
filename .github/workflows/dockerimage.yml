@@ -23,5 +23,5 @@ jobs:
       - name: Build for ${{ matrix.version }}
         run: |
           docker build --build-arg BRANCH=${{ matrix.version }} . \
-            -t docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ github.sha }} \
+            -t docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ github.sha }} ;\
           docker push docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ github.sha }}
