@@ -15,14 +15,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Build for ${{ matrix.version }}
-        run: docker build --build-arg BRANCH=${{ matrix.version }}
-      - name: Dockerize
-        if: success()
-        uses: manusa/actions-publish-docker@master
+      - uses: azure/docker-login@v1
         with:
-          name: splunk/splunk-syslog-ng-container/splunk-syslog-ng-container
+          login-server: contoso.azurecr.io
           username: ${{ secrets.GitHub_User }}
           password: ${{ secrets.GitHub_PAT }}
-          tag: {{ matrix.version }}
-          registry: docker.pkg.github.com
+      - name: Build for ${{ matrix.version }}
+        run: |
+          docker build --build-arg BRANCH=${{ matrix.version }} . \
+            -t docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ github.sha }} \
+          docker push docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ github.sha }}
