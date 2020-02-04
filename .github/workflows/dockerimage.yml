@@ -34,6 +34,7 @@ jobs:
           docker push docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ matrix.version }}
 
       - name: Push tag for syslog-ng build
+        run: |
           regex='\((.*)\)'
           sv=$(docker run docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ github.sha }} --version --rm | head -n 2 | tail -n 1 )
           [[ sv =~ $regex ]]
