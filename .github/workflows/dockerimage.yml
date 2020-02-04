@@ -22,6 +22,6 @@ jobs:
           password: ${{ secrets.GitHub_PAT }}
       - name: Build for ${{ matrix.version }}
         run: |
-          docker build --build-arg BRANCH=${{ matrix.version }} \
-            -t docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ github.sha }} . \
+          docker build --build-arg BRANCH=${{ matrix.version }} . \
+            -t docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ github.sha }} \
           docker push docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ github.sha }}
