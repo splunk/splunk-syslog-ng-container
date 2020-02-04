@@ -1,18 +1,15 @@
 # README
 
-Splunk Connect for Syslog is an open source packaged solution for 
-getting data into Splunk using syslog-ng (OSE) and the Splunk 
-HTTP event Collector. 
+Splunk Syslog-NG container is the base image for Splunk Connect for Syslog (SC4S) 
+
+## Build Status
+
+![Docker Image CI](https://github.com/splunk/splunk-syslog-ng-container/workflows/Docker%20Image%20CI/badge.svg?branch=master)
+
 
 ## Purpose
 
-Splunk Connect for Syslog (SC4S) is a community project focused on reducing the pain of getting syslog data sources into Splunk. The primary pain points SC4S addresses include the following…
-
-* Shortage of deep syslog expertise in the community
-* Inconsistency between syslog server deployments creates a support challenge
-* Data sources tagged with catch-all sourcetype “syslog” which limits Splunk analytics
-* Uneven data distribution between Splunk indexers impacts search performance
-* Splunk Connect for Syslog should be used by any Splunk customer needing to onboard data sources via syslog to Splunk.
+Maintain up to date current and future base images to accelerate the build and test of SC4S
 
 ## Usage
 
