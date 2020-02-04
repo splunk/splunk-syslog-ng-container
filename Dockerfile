@@ -17,16 +17,16 @@ RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noar
     dnf install 'dnf-command(config-manager)' -y ;\
     dnf config-manager --set-enabled PowerTools -y; \
     dnf update -y ;\
-    dnf upgrade
-
-RUN dnf group install "Development Tools" -y ;\
+    dnf upgrade ;\
+    dnf install -y ca-certificates wget curl  ;\
+    dnf group install "Development Tools" -y ;\
     dnf install findutils autoconf \
-    autoconf automake ca-certificates git libtool pkgconfig bison byacc file \
+    automake git libtool pkgconfig bison byacc file \
     flex pcre-devel glib2-devel openssl-devel libcurl-devel \
     python3 python3-devel \
     net-snmp-devel \
     libuuid-devel cmake make libxslt gcc-c++ tzdata libxml2 sqlite \
-    gnupg wget curl which bzip2 libsecret ivykis-devel autoconf-archive json-c-devel -y
+    gnupg which bzip2 libsecret ivykis-devel autoconf-archive json-c-devel -y
 
 
 RUN CRITERION_VERSION=2.3.3 ;\
