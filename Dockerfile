@@ -6,7 +6,9 @@
 #
 #You should have received a copy of the CC0 legalcode along with this
 #work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
-FROM centos:centos8
+
+#We first build a "builder" image as a layer this is handy when working locally to reduce build time
+FROM centos:centos8 AS builder
 ENV CONFIGURE_FLAGS="--prefix=/opt/syslog-ng --with-ivykis=system --with-jsonc=system --disable-env-wrapper --disable-memtrace --disable-tcp-wrapper --disable-linux-caps --disable-man-pages --enable-all-modules --enable-force-gnu99 --enable-json --enable-native --enable-python --enable-http --disable-kafka --disable-java --disable-java-modules --disable-spoof_source --disable-sun_streams --disable-sql --disable-pacct --disable-mongodb --disable-amqp --disable-stomp --disable-redis --disable-systemd --disable-geoip --disable-geoip2 --disable-riemann --disable-smtp --disable-snmp_dest --with-python=3 --enable-dynamic-linking"
 
 ENV DISTCHECK_CONFIGURE_FLAGS="--prefix=/opt/syslog-ng --with-ivykis=system --with-jsonc=system --disable-env-wrapper --disable-memtrace --disable-tcp-wrapper --disable-linux-caps --disable-man-pages --enable-all-modules --enable-force-gnu99 --enable-json --enable-native --enable-python --enable-http --disable-kafka --disable-java --disable-java-modules --disable-spoof_source --disable-sun_streams --disable-sql --disable-pacct --disable-mongodb --disable-amqp --disable-stomp --disable-redis --disable-systemd --disable-geoip --disable-geoip2 --disable-riemann --disable-smtp --disable-snmp_dest --with-python=3 --enable-dynamic-linking"
@@ -36,6 +38,8 @@ RUN CRITERION_VERSION=2.3.3 ;\
     ldconfig ;\
     rm -rf /tmp/criterion.tar.bz2 /tmp/criterion-v${CRITERION_VERSION}
 
+# Using the builder layer we will build syslog-ng and make this a layer we can copy from
+FROM builder as syslog-ng
 ARG BRANCH=master
 ENV SYSLOG_VERSION=$BRANCH
 RUN echo cloning $SYSLOG_VERSION ;\
@@ -50,7 +54,7 @@ RUN cd /work;\
     ./configure $CONFIGURE_FLAGS ;\
     make -j -l 2.5 install
 
-
+#This is the actual splunk-syslog-ng container with syslog-ng and goss
 FROM registry.access.redhat.com/ubi8/ubi
 
 RUN cd /tmp ;\
@@ -62,11 +66,9 @@ RUN cd /tmp ;\
 ENV DEBCONF_NONINTERACTIVE_SEEN=true
 
 RUN curl -fsSL https://goss.rocks/install | GOSS_VER=v0.3.7 sh
-COPY goss.yaml /etc/goss.yaml
+COPY goss.yaml /goss.yaml
 
-COPY --from=0 /opt/syslog-ng /opt/syslog-ng
-
-COPY --from=hairyhenderson/gomplate:v3.5.0 /gomplate /usr/local/bin/gomplate
+COPY --from=syslog-ng /opt/syslog-ng /opt/syslog-ng
 
 COPY entrypoint.sh /
 RUN /opt/syslog-ng/sbin/syslog-ng -V
@@ -77,4 +79,4 @@ EXPOSE 6514/tcp
 
 ENTRYPOINT ["/entrypoint.sh", "-F"]
 
-HEALTHCHECK --start-period=15s --interval=30s --timeout=6s CMD goss -g /etc/goss.yaml validate
+HEALTHCHECK --start-period=15s --interval=30s --timeout=6s CMD goss -g /goss.yaml validate
