@@ -70,12 +70,31 @@ COPY goss.yaml /goss.yaml
 
 COPY --from=syslog-ng /opt/syslog-ng /opt/syslog-ng
 
+RUN groupadd --gid 1024 syslog ;\
+    useradd -M -g 1024 -u 1024 syslog ;\
+    usermod -L syslog
+
+
+RUN chown :1024 /opt/syslog-ng/etc ;\
+    chmod 775 /opt/syslog-ng/etc ;\
+    chown :1024 /opt/syslog-ng/var ;\
+    chmod 775 /opt/syslog-ng/var ;\
+    touch /var/log/syslog-ng.out ;\
+    touch /var/log/syslog-ng.err ;\
+    chmod 755 /var/log/syslog-ng.*
+
 COPY entrypoint.sh /
-RUN /opt/syslog-ng/sbin/syslog-ng -V
 
 EXPOSE 514
 EXPOSE 601/tcp
 EXPOSE 6514/tcp
+
+#Note this is commented out because the default syslog-ng config will try to read
+#/dev/log a low priv user cannot read this and the container will fail in SC4S
+#and other uses the low user may be selected
+#USER syslog
+
+RUN /opt/syslog-ng/sbin/syslog-ng -V
 
 ENTRYPOINT ["/entrypoint.sh", "-F"]
 

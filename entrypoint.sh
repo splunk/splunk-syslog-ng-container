@@ -10,7 +10,8 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 # USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-/opt/syslog-ng/sbin/syslog-ng -s >>/var/log/syslog-ng.out 2>/var/log/syslog-ng.err
+mkdir -p /opt/syslog-ng/var/log
+/opt/syslog-ng/sbin/syslog-ng -s >>/opt/syslog-ng/var/logsyslog-ng.out 2>>/opt/syslog-ng/var/log/syslog-ng.err
 
 echo syslog-ng starting
 exec /opt/syslog-ng/sbin/syslog-ng $@
