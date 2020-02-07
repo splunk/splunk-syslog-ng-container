@@ -33,6 +33,17 @@ jobs:
           docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ matrix.version }}
           docker push docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ matrix.version }}
 
+      - uses: azure/docker-login@v1
+        with:
+          username: ${{ secrets.GitHub_User }}
+          password: ${{ secrets.GitHub_PAT }}
+
+      - name: Push Tag hub.docker.com/splunk/scs/splunk-syslog-ng-container:${{ matrix.version }}
+        run: |          
+          docker tag docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${{ github.sha }} \
+          splunk/scs/splunk-syslog-ng-container-${{ matrix.version }}
+          docker push splunk/scs/splunk-syslog-ng-container-${{ matrix.version }}
+
       - name: Push tag for syslog-ng build
         run: ./tagimage.sh ${{ github.sha }}
 
