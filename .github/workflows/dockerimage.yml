@@ -35,7 +35,7 @@ jobs:
 
       - uses: azure/docker-login@v1
         with:
-          username: ${{ secrets.DOCKER_USER }}
+          username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Push Tag splunk/scs/splunk-syslog-ng-container-${{ matrix.version }}
