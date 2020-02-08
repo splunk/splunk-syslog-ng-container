@@ -4,8 +4,7 @@ Splunk Syslog-NG container is the base image for Splunk Connect for Syslog (SC4S
 
 ## Build Status
 
-![Docker Image CI](https://github.com/splunk/splunk-syslog-ng-container/workflows/Docker%20Image%20CI/badge.svg?branch=master)
-
+[![CircleCI](https://circleci.com/gh/splunk/splunk-syslog-ng-container/tree/master.svg?style=svg)](https://circleci.com/gh/splunk/splunk-syslog-ng-container/tree/master)
 
 ## Purpose
 

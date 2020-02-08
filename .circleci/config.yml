@@ -33,8 +33,8 @@ build: &build
     - run:
         name: Push SC4S Docker Hub
         command: |
-          docker tag docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${SYSLOG}-${CIRCLE_SHA1} splunk/scs:base-${SYSLOG}-${CIRCLE_SHA1}
-          docker push splunk/scs:base-${SYSLOG}-${CIRCLE_SHA1}
+          docker tag docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${SYSLOG}-${CIRCLE_SHA1} splunk/scs:base-${SYSLOG}
+          docker push splunk/scs:base-${SYSLOG}
 
 
 
