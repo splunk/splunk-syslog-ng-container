@@ -22,7 +22,7 @@ build: &build
     - run:
         name: Build Image
         command: |
-          docker build --build-arg BRANCH=${{ matrix.version }} . \
+          docker build --build-arg BRANCH=${SYSLOG} . \
             -t docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${SYSLOG}-${CIRCLE_SHA1}
     - run:
         name: Push SC4S Git Hub
