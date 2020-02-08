@@ -1,0 +1,94 @@
+#Splunk Connect for Syslog (SC4S) by Splunk, Inc.
+#
+#To the extent possible under law, the person who associated CC0 with
+#Splunk Connect for Syslog (SC4S) has waived all copyright and related or neighboring rights
+#to Splunk Connect for Syslog (SC4S).
+#
+#You should have received a copy of the CC0 legalcode along with this
+#work.  If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+version: 2.1
+
+build: &build
+  steps:
+    - checkout
+    - setup_remote_docker:
+        docker_layer_caching: true
+    - run:
+        name: Docker Login
+        command: |
+          docker login -u $DOCKER_USER -p $DOCKER_PASS
+          docker login -u $GITHUB_USER -p $GITHUB_TOKEN docker.pkg.github.com
+    - semver-orb/export-tag
+    - run:
+        name: Build Image
+        command: |
+          docker build --build-arg BRANCH=${{ matrix.version }} . \
+            -t docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${SYSLOG}-${CIRCLE_SHA1}
+    - run:
+        name: Push SC4S Git Hub
+        command: |
+          docker push \
+            docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${SYSLOG}-${CIRCLE_SHA1}
+
+    - run:
+        name: Push SC4S Docker Hub
+        command: |
+          docker tag docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${SYSLOG}-${CIRCLE_SHA1} splunk/scs:base-${SYSLOG}-${CIRCLE_SHA1}
+          docker push splunk/scs:base-${SYSLOG}-${CIRCLE_SHA1}
+
+
+
+
+orbs:
+  docker: circleci/docker@0.5.20
+  go: circleci/go@0.2.0
+  snyk: snyk/snyk@0.0.8
+  versioning: kollex/versioning@1.0.0
+  semver-orb: tv2norge/semver-orb@0.0.1
+
+jobs:
+  build-tests:
+    docker:
+      - image: circleci/buildpack-deps:18.04
+    environment:
+      SYSLOG: '3.25.1'
+    steps:
+        - checkout
+        - setup_remote_docker:
+            docker_layer_caching: true
+        - run:
+            name: Docker Login
+            command: |
+              docker login -u $DOCKER_USER -p $DOCKER_PASS
+              docker login -u $GITHUB_USER -p $GITHUB_TOKEN docker.pkg.github.com
+        - run:
+            name: Build Splunk
+            command: |
+              docker build tests \
+                -t docker.pkg.github.com/splunk/splunk-connect-for-syslog/stg-splunk-connect-for-syslog:tests-${CIRCLE_SHA1}
+        - run:
+            name: Push Splunk
+            command: |
+              docker push \
+                docker.pkg.github.com/splunk/splunk-connect-for-syslog/stg-splunk-connect-for-syslog:tests-${CIRCLE_SHA1}
+
+#JOB SC4S
+  build-3-25-1:
+    docker:
+      - image: circleci/buildpack-deps:18.04
+    environment:
+      SYSLOG: '3.25.1'
+    <<: *build
+  build-master:
+    docker:
+      - image: circleci/buildpack-deps:18.04
+    environment:
+      SYSLOG: 'master'
+    <<: *build
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build-3-25-1
+      - build-master
