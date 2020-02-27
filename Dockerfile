@@ -61,7 +61,8 @@ RUN cd /tmp ;\
     dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y; \
     dnf update -y ;\
     dnf install wget gcc tzdata libdbi libsecret libxml2 sqlite \
-    python3 libcurl ivykis scl-utils curl wget openssl tcpdump nc -y
+    python3 libcurl ivykis scl-utils curl wget openssl nc -y; \
+    yum install tcpdump -y
 
 ENV DEBCONF_NONINTERACTIVE_SEEN=true
 
