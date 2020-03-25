@@ -22,7 +22,7 @@ build: &build
     - run:
         name: Build Image
         command: |
-          docker build --build-arg BRANCH=${SYSLOG} . \
+          docker build --build-arg BRANCH_SYSLOGNG=${SYSLOG} --build-arg BRANCH_SNMP=${SNMP} . \
             -t docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${SYSLOG}-${CIRCLE_SHA1}
     - run:
         name: Push SC4S Git Hub
@@ -78,12 +78,21 @@ jobs:
       - image: circleci/buildpack-deps:18.04
     environment:
       SYSLOG: 'syslog-ng-3.25.1'
+      SNMP: '5.8'
+    <<: *build
+  build-3-26-1:
+    docker:
+      - image: circleci/buildpack-deps:18.04
+    environment:
+      SYSLOG: 'syslog-ng-3.26.1'
+      SNMP: '5.8'
     <<: *build
   build-master:
     docker:
       - image: circleci/buildpack-deps:18.04
     environment:
       SYSLOG: 'master'
+      SNMP: 'master'
     <<: *build
 
 workflows:

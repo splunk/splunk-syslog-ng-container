@@ -40,19 +40,31 @@ RUN CRITERION_VERSION=2.3.3 ;\
 
 # Using the builder layer we will build syslog-ng and make this a layer we can copy from
 FROM builder as syslog-ng
-ARG BRANCH=master
-ENV SYSLOG_VERSION=$BRANCH
+ARG BRANCH_SYSLOGNG=master
+ENV SYSLOG_VERSION=$BRANCH_SYSLOGNG
 RUN echo cloning $SYSLOG_VERSION ;\
     git clone https://github.com/syslog-ng/syslog-ng.git /work ;\
     cd /work ;\
     if [ "$SYSLOG_VERSION" != "master" ]; then git checkout tags/$SYSLOG_VERSION; fi
-
 
 RUN cd /work;\
     pip3 install -r requirements.txt ;\
     ./autogen.sh ;\
     ./configure $CONFIGURE_FLAGS ;\
     make -j -l 2.5 install
+
+FROM builder as snmp
+ARG BRANCH_SNMP=master
+ENV SNMP_VERSION=$BRANCH_SNMP
+RUN echo cloning $SNMP_VERSION ;\
+    git clone https://github.com/net-snmp/net-snmp.git /work ;\
+    cd /work ;\
+    if [ "$SNMP_VERSION" != "master" ]; then git checkout tags/$SNMP_VERSION; fi
+
+RUN cd /work;\
+    ./configure --with-default-snmp-version="3" --with-sys-contact="contact" --with-sys-location="unknown" --with-logfile="/var/log/snmpd.log" --with-persistent-directory="/var/net-snmp" --prefix=/opt/net-snmp;\
+    make ;\
+    make install
 
 #This is the actual splunk-syslog-ng container with syslog-ng and goss
 FROM registry.access.redhat.com/ubi8/ubi
@@ -69,11 +81,13 @@ RUN curl -fsSL https://goss.rocks/install | GOSS_VER=v0.3.7 sh
 COPY goss.yaml /goss.yaml
 
 COPY --from=syslog-ng /opt/syslog-ng /opt/syslog-ng
+COPY --from=syslog-ng /opt/syslog-ng /opt/syslog-ng
 
 RUN groupadd --gid 1024 syslog ;\
     useradd -M -g 1024 -u 1024 syslog ;\
     usermod -L syslog
 
+RUN mkdir -p /opt/net-snmp/etc/snmp
 
 RUN chown :1024 /opt/syslog-ng/etc ;\
     chmod 775 /opt/syslog-ng/etc ;\
