@@ -36,9 +36,6 @@ build: &build
           docker tag docker.pkg.github.com/splunk/splunk-syslog-ng-container/splunk-syslog-ng-container:${SYSLOG}-${CIRCLE_SHA1} splunk/scs:base-${SYSLOG}
           docker push splunk/scs:base-${SYSLOG}
 
-
-
-
 orbs:
   docker: circleci/docker@0.5.20
   go: circleci/go@0.2.0
@@ -51,48 +48,48 @@ jobs:
     docker:
       - image: circleci/buildpack-deps:18.04
     environment:
-      SYSLOG: '3.25.1'
+      SYSLOG: "3.25.1"
     steps:
-        - checkout
-        - setup_remote_docker:
-            docker_layer_caching: true
-        - run:
-            name: Docker Login
-            command: |
-              docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker login -u $GITHUB_USER -p $GITHUB_TOKEN docker.pkg.github.com
-        - run:
-            name: Build Splunk
-            command: |
-              docker build tests \
-                -t docker.pkg.github.com/splunk/splunk-connect-for-syslog/stg-splunk-connect-for-syslog:tests-${CIRCLE_SHA1}
-        - run:
-            name: Push Splunk
-            command: |
-              docker push \
-                docker.pkg.github.com/splunk/splunk-connect-for-syslog/stg-splunk-connect-for-syslog:tests-${CIRCLE_SHA1}
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Docker Login
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker login -u $GITHUB_USER -p $GITHUB_TOKEN docker.pkg.github.com
+      - run:
+          name: Build Splunk
+          command: |
+            docker build tests \
+              -t docker.pkg.github.com/splunk/splunk-connect-for-syslog/stg-splunk-connect-for-syslog:tests-${CIRCLE_SHA1}
+      - run:
+          name: Push Splunk
+          command: |
+            docker push \
+              docker.pkg.github.com/splunk/splunk-connect-for-syslog/stg-splunk-connect-for-syslog:tests-${CIRCLE_SHA1}
 
-#JOB SC4S
+  #JOB SC4S
   build-3-25-1:
     docker:
       - image: circleci/buildpack-deps:18.04
     environment:
-      SYSLOG: 'syslog-ng-3.25.1'
-      SNMP: '5.8'
+      SYSLOG: "syslog-ng-3.25.1"
+      SNMP: "5.8"
     <<: *build
   build-3-26-1:
     docker:
       - image: circleci/buildpack-deps:18.04
     environment:
-      SYSLOG: 'syslog-ng-3.26.1'
-      SNMP: '5.8'
+      SYSLOG: "syslog-ng-3.26.1"
+      SNMP: "5.8"
     <<: *build
   build-master:
     docker:
       - image: circleci/buildpack-deps:18.04
     environment:
-      SYSLOG: 'master'
-      SNMP: 'master'
+      SYSLOG: "master"
+      SNMP: "master"
     <<: *build
 
 workflows:
@@ -100,4 +97,5 @@ workflows:
   build_and_deploy:
     jobs:
       - build-3-25-1
+      - build-3-26-1
       - build-master
