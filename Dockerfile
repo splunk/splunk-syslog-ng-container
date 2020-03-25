@@ -81,7 +81,7 @@ RUN curl -fsSL https://goss.rocks/install | GOSS_VER=v0.3.7 sh
 COPY goss.yaml /goss.yaml
 
 COPY --from=syslog-ng /opt/syslog-ng /opt/syslog-ng
-COPY --from=syslog-ng /opt/syslog-ng /opt/syslog-ng
+COPY --from=snmp /opt/net-snmp /opt/net-snmp
 
 RUN groupadd --gid 1024 syslog ;\
     useradd -M -g 1024 -u 1024 syslog ;\
