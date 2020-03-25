@@ -24,7 +24,7 @@ RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noar
     automake git libtool pkgconfig bison byacc file \
     flex pcre-devel glib2-devel openssl-devel libcurl-devel \
     python3 python3-devel \
-    net-snmp-devel \
+    net-snmp net-snmp-devel \
     libuuid-devel cmake make libxslt gcc-c++ tzdata libxml2 sqlite \
     gnupg which bzip2 libsecret ivykis-devel autoconf-archive json-c-devel -y
 
