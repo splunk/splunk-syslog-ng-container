@@ -75,14 +75,14 @@ jobs:
       - image: circleci/buildpack-deps:18.04
     environment:
       SYSLOG: "syslog-ng-3.25.1"
-      SNMP: "5.8"
+      SNMP: "v5.8"
     <<: *build
   build-3-26-1:
     docker:
       - image: circleci/buildpack-deps:18.04
     environment:
       SYSLOG: "syslog-ng-3.26.1"
-      SNMP: "5.8"
+      SNMP: "v5.8"
     <<: *build
   build-master:
     docker:
