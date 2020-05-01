@@ -48,7 +48,7 @@ jobs:
     docker:
       - image: circleci/buildpack-deps:18.04
     environment:
-      SYSLOG: "3.25.1"
+      SYSLOG: "3.27.1"
     steps:
       - checkout
       - setup_remote_docker:
@@ -84,6 +84,13 @@ jobs:
       SYSLOG: "syslog-ng-3.26.1"
       SNMP: "v5.8"
     <<: *build
+  build-3-27-1:
+    docker:
+      - image: circleci/buildpack-deps:18.04
+    environment:
+      SYSLOG: "syslog-ng-3.26.1"
+      SNMP: "v5.8"
+    <<: *build
   build-master:
     docker:
       - image: circleci/buildpack-deps:18.04
@@ -98,4 +105,5 @@ workflows:
     jobs:
       - build-3-25-1
       - build-3-26-1
+      - build-3-27-1
       - build-master
