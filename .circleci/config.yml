@@ -91,6 +91,13 @@ jobs:
       SYSLOG: "syslog-ng-3.27.1"
       SNMP: "v5.8"
     <<: *build
+  build-3-28-1:
+    docker:
+      - image: circleci/buildpack-deps:18.04
+    environment:
+      SYSLOG: "syslog-ng-3.28.1"
+      SNMP: "v5.8"
+    <<: *build    
   build-master:
     docker:
       - image: circleci/buildpack-deps:18.04
@@ -103,7 +110,7 @@ workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - build-3-25-1
       - build-3-26-1
       - build-3-27-1
+      - build-3-28-1      
       - build-master
