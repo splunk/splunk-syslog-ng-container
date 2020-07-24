@@ -21,7 +21,7 @@ RUN dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noar
     flex pcre-devel glib2-devel openssl-devel libcurl-devel \
     python3 python3-devel perl-devel \
     libuuid-devel cmake make libxslt gcc-c++ tzdata libxml2 sqlite \
-    gnupg which bzip2 libsecret ivykis-devel autoconf-archive json-c-devel \-y
+    gnupg which bzip2 libsecret ivykis-devel autoconf-archive json-c-devel libzstd-devel -y
 
 RUN CRITERION_VERSION=2.3.3 ;\
     cd /tmp/;\
@@ -42,14 +42,26 @@ RUN echo cloning $SNMP_VERSION ;\
     cd /work/net-snmp ;\
     if [ "$SNMP_VERSION" != "master" ]; then git checkout tags/$SNMP_VERSION; fi
 
-ENV CONFIGURE_FLAGS="--prefix=/opt/syslog-ng --with-ivykis=system --with-jsonc=system --disable-env-wrapper --disable-memtrace --disable-tcp-wrapper --disable-linux-caps --disable-man-pages --enable-all-modules --enable-force-gnu99 --enable-json --enable-native --enable-python --enable-http --disable-kafka --disable-java --disable-java-modules --disable-spoof_source --disable-sun_streams --disable-sql --disable-pacct --disable-mongodb --disable-amqp --disable-stomp --disable-redis --disable-systemd --disable-geoip --disable-geoip2 --disable-riemann --disable-smtp --disable-snmp_dest --with-python=3 --enable-dynamic-linking --with-net-snmp=/opt/net-snmp/bin"
+ENV CONFIGURE_FLAGS="--prefix=/opt/syslog-ng --with-ivykis=system --with-jsonc=system --disable-env-wrapper --disable-memtrace --disable-tcp-wrapper --disable-linux-caps --disable-man-pages --enable-all-modules --enable-force-gnu99 --enable-json --enable-native --enable-python --enable-http --enable-kafka --disable-java --disable-java-modules --disable-spoof_source --disable-sun_streams --disable-sql --disable-pacct --disable-mongodb --disable-amqp --disable-stomp --disable-redis --disable-systemd --disable-geoip --disable-geoip2 --disable-riemann --disable-smtp --disable-snmp_dest --with-python=3 --enable-dynamic-linking --with-net-snmp=/opt/net-snmp/bin"
 
-ENV DISTCHECK_CONFIGURE_FLAGS="--prefix=/opt/syslog-ng --with-ivykis=system --with-jsonc=system --disable-env-wrapper --disable-memtrace --disable-tcp-wrapper --disable-linux-caps --disable-man-pages --enable-all-modules --enable-force-gnu99 --enable-json --enable-native --enable-python --enable-http --disable-kafka --disable-java --disable-java-modules --disable-spoof_source --disable-sun_streams --disable-sql --disable-pacct --disable-mongodb --disable-amqp --disable-stomp --disable-redis --disable-systemd --disable-geoip --disable-geoip2 --disable-riemann --disable-smtp --disable-snmp_dest --with-python=3 --enable-dynamic-linking --with-net-snmp=/opt/net-snmp/bin"
+ENV DISTCHECK_CONFIGURE_FLAGS="--prefix=/opt/syslog-ng --with-ivykis=system --with-jsonc=system --disable-env-wrapper --disable-memtrace --disable-tcp-wrapper --disable-linux-caps --disable-man-pages --enable-all-modules --enable-force-gnu99 --enable-json --enable-native --enable-python --enable-http --enable-kafka --disable-java --disable-java-modules --disable-spoof_source --disable-sun_streams --disable-sql --disable-pacct --disable-mongodb --disable-amqp --disable-stomp --disable-redis --disable-systemd --disable-geoip --disable-geoip2 --disable-riemann --disable-smtp --disable-snmp_dest --with-python=3 --enable-dynamic-linking --with-net-snmp=/opt/net-snmp/bin"
 
 RUN cd /work/net-snmp;\
     ./configure --with-default-snmp-version="3" --with-sys-contact="contact" --with-sys-location="unknown" --with-logfile="/var/log/snmpd.log" --with-persistent-directory="/var/net-snmp" --prefix=/opt/net-snmp;\
     make ;\
     make install
+
+ARG KAFKA_VERSION=master
+ENV KAFKA_VERSION=$KAFKA_VERSION
+RUN cd /work ;\
+    echo cloning $KAFKA_VERSION ;\
+    git clone https://github.com/edenhill/librdkafka.git /work/librdkafka ;\
+    cd /work/librdkafka  ;\
+    if [ "$KAFKA_VERSION" != "master" ]; then git checkout tags/$KAFKA_VERSION; fi
+RUN cd /work/librdkafka; ./configure --prefix=/usr --libdir=/usr/lib64;\
+    make ;\    
+    make install
+
 
 ARG BRANCH_SYSLOGNG=master
 ENV SYSLOG_VERSION=$BRANCH_SYSLOGNG
@@ -70,7 +82,7 @@ FROM registry.access.redhat.com/ubi8/ubi
 RUN cd /tmp ;\
     dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y; \
     dnf update -y ;\
-    dnf install wget gcc tzdata libdbi libsecret libxml2 sqlite \
+    dnf install wget gcc tzdata libdbi libsecret libxml2 sqlite libzstd\
     python3 libcurl ivykis scl-utils curl wget openssl nc perl -y; 
 
 ENV DEBCONF_NONINTERACTIVE_SEEN=true
@@ -80,12 +92,17 @@ COPY goss.yaml /goss.yaml
 
 COPY --from=syslog-ng /opt/syslog-ng /opt/syslog-ng
 COPY --from=syslog-ng /opt/net-snmp /opt/net-snmp
+COPY --from=syslog-ng /work/librdkafka /work/librdkafka
 
 RUN groupadd --gid 1024 syslog ;\
     useradd -M -g 1024 -u 1024 syslog ;\
     usermod -L syslog
 
 RUN mkdir -p /opt/net-snmp/etc/snmp
+
+RUN cd /work/librdkafka ;\
+    make install ;\
+    cd ..; rm -rf /work/librdkafka
 
 RUN chown :1024 /opt/syslog-ng/etc ;\
     chmod 775 /opt/syslog-ng/etc ;\
