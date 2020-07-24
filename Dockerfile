@@ -127,4 +127,4 @@ RUN /opt/syslog-ng/sbin/syslog-ng -V
 
 ENTRYPOINT ["/entrypoint.sh", "-F"]
 
-HEALTHCHECK CMD curl -s --fail http://localhost:8080/healthz || exit 1
+HEALTHCHECK --timeout=6s CMD curl -s --fail http://localhost:8080/healthz || exit 1
