@@ -87,7 +87,7 @@ RUN cd /tmp ;\
 
 ENV DEBCONF_NONINTERACTIVE_SEEN=true
 
-RUN curl -fsSL https://goss.rocks/install | GOSS_VER=v0.3.7 sh
+RUN curl -fsSL https://goss.rocks/install | GOSS_VER=v0.3.13 sh
 COPY goss.yaml /goss.yaml
 
 COPY --from=syslog-ng /opt/syslog-ng /opt/syslog-ng
@@ -127,4 +127,4 @@ RUN /opt/syslog-ng/sbin/syslog-ng -V
 
 ENTRYPOINT ["/entrypoint.sh", "-F"]
 
-HEALTHCHECK --start-period=15s --interval=30s --timeout=6s CMD goss -g /goss.yaml validate
+HEALTHCHECK CMD curl -s --fail http://localhost:8080/healthz || exit 1

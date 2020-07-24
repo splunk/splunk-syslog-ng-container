@@ -13,5 +13,7 @@
 mkdir -p /opt/syslog-ng/var/log
 /opt/syslog-ng/sbin/syslog-ng -s >>/opt/syslog-ng/var/logsyslog-ng.out 2>>/opt/syslog-ng/var/log/syslog-ng.err
 
+echo starting goss
+goss serve --format json &
 echo syslog-ng starting
 exec /opt/syslog-ng/sbin/syslog-ng $@
